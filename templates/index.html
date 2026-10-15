@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Whatif: watch the world change</title>
+<meta name="description" content="Type any what-if and watch the world change: a timeline, the chain of cause and effect, who wins and loses, and how believable it is.">
+<meta name="theme-color" content="#0a0a0a">
+<meta property="og:title" content="Whatif: watch the world change">
+<meta property="og:description" content="Type any what-if and see how the world would change.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23101010'/%3E%3Ccircle cx='32' cy='32' r='6' fill='%23e08a5b'/%3E%3Ccircle cx='32' cy='32' r='15' fill='none' stroke='%23ececec' stroke-width='3' opacity='.7'/%3E%3Ccircle cx='32' cy='32' r='25' fill='none' stroke='%23ececec' stroke-width='3' opacity='.3'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+<script id="boot" type="application/json">{{ boot|tojson }}</script>
+
+<header class="top">
+  <a class="brand" href="/" aria-label="Whatif home">
+    <svg viewBox="0 0 64 64" width="28" height="28" aria-hidden="true"><circle cx="32" cy="32" r="6" fill="var(--accent)"/><circle cx="32" cy="32" r="15" fill="none" stroke="currentColor" stroke-width="3" opacity=".7"/><circle cx="32" cy="32" r="25" fill="none" stroke="currentColor" stroke-width="3" opacity=".3"/></svg>
+    <span>Whatif</span>
+  </a>
+  <div class="top-r">
+    <span id="streak" class="chip" hidden></span>
+    <button id="open-multi" class="ghost" type="button" aria-haspopup="dialog">Multiverse <span id="multi-n" class="count" hidden></span></button>
+  </div>
+</header>
+
+<main>
+  <section id="shared" class="shared" hidden>
+    <p id="shared-msg">Someone shared this Whatif with you.</p>
+    <a class="btn" href="/">Make your own</a>
+  </section>
+
+  <section id="ask" class="hero">
+    <h1>What <em>if</em>&hellip;</h1>
+    <p class="sub">Type anything. Watch the world change.</p>
+    <form id="form" autocomplete="off">
+      <label class="sr" for="q">Your what-if</label>
+      <div class="askbox">
+        <textarea id="q" rows="2" maxlength="240" placeholder="What if the Moon vanished tomorrow?" enterkeyhint="go"></textarea>
+        <button id="go" class="btn" type="submit">Ripple it</button>
+      </div>
+      <div class="opts">
+        <div class="optgroup"><span class="optlabel">Voice</span>
+          <div class="seg" data-key="tone" role="group" aria-label="Voice">
+            <button type="button" data-v="historian">Historian</button><button type="button" data-v="documentary">Documentary</button>
+            <button type="button" data-v="funny">Funny</button><button type="button" data-v="kid">Simple</button>
+          </div></div>
+        <div class="optgroup"><span class="optlabel">Length</span>
+          <div class="seg" data-key="depth" role="group" aria-label="Length">
+            <button type="button" data-v="quick">Quick</button><button type="button" data-v="normal">Normal</button><button type="button" data-v="epic">Epic</button>
+          </div></div>
+        <div class="optgroup"><span class="optlabel">Realism</span>
+          <div class="seg" data-key="realism" role="group" aria-label="Realism">
+            <button type="button" data-v="real">Realistic</button><button type="button" data-v="mixed">Mixed</button><button type="button" data-v="wild">Wild</button>
+          </div></div>
+      </div>
+    </form>
+
+    <div class="ideas">
+      <div id="cats" class="cats" role="group" aria-label="Idea topics"></div>
+      <div id="pills" class="pills"></div>
+      <div class="ideabar">
+        <button id="shuffle" class="ghost" type="button">Shuffle ideas</button>
+        <button id="surprise" class="ghost" type="button">Surprise me</button>
+      </div>
+    </div>
+
+    <button id="daily" class="daily" type="button">
+      <span class="daily-k">Today&rsquo;s what-if <span id="daily-done" hidden>&middot; done</span></span>
+      <span id="daily-t" class="daily-t"></span>
+    </button>
+  </section>
+
+  <section id="result" hidden aria-live="polite">
+    <div id="status" class="status" hidden>
+      <span class="ripple" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span id="status-t">Rewinding history&hellip;</span>
+      <button id="stop" class="ghost" type="button">Stop</button>
+    </div>
+
+    <article id="story" hidden>
+      <header class="s-head">
+        <p class="kicker" id="s-kicker">What if</p>
+        <h2 id="s-title"></h2>
+        <p id="s-premise" class="s-premise"></p>
+        <p id="s-demo" class="demo" hidden></p>
+      </header>
+      <details id="s-real" class="real" hidden><summary>What really happened</summary><p id="s-real-t"></p></details>
+      <ol id="timeline" class="timeline"></ol>
+      <section id="chainwrap" class="block" hidden><h3>The domino chain</h3><ol id="chain" class="chain"></ol></section>
+      <section id="verdict" class="block" hidden>
+        <div class="cols">
+          <div><h3 class="win-h">Who wins</h3><ul id="win" class="plain"></ul></div>
+          <div><h3 class="lose-h">Who loses</h3><ul id="lose" class="plain"></ul></div>
+        </div>
+        <p id="same" class="same" hidden></p>
+      </section>
+      <section id="scorewrap" class="block score" hidden>
+        <svg viewBox="0 0 80 80" width="92" height="92" aria-hidden="true"><circle cx="40" cy="40" r="34" class="ring-bg"/><circle id="ring" cx="40" cy="40" r="34" class="ring" transform="rotate(-90 40 40)"/></svg>
+        <div><p class="score-n"><b id="score-n">0</b><span>/100 believable</span></p><p id="score-why" class="muted"></p></div>
+      </section>
+      <section id="factwrap" class="block fact" hidden><h3>Did you know?</h3><p id="fact"></p></section>
+      <section id="branchwrap" class="block" hidden><h3>Keep pulling the thread</h3><div id="branches" class="pills"></div></section>
+      <div id="actions" class="actions" hidden>
+        <button id="a-share" class="btn" type="button">Share link</button>
+        <button id="a-image" class="btn alt" type="button">Save as image</button>
+        <button id="a-copy" class="btn alt" type="button">Copy text</button>
+        <button id="a-new" class="btn alt" type="button">New what-if</button>
+      </div>
+    </article>
+
+    <div id="note" class="note" hidden>
+      <p id="note-t"></p>
+      <div class="actions"><button id="note-retry" class="btn alt" type="button" hidden>Try again</button><button id="note-new" class="btn alt" type="button">Ask something else</button></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p>Made by me, with Claude as my helper and the OpenAI API writing the stories.</p>
+  <p class="muted">Whatif is speculation for fun. The &ldquo;what really happened&rdquo; parts can still be wrong, so check facts before using them for school.</p>
+</footer>
+
+<div id="scrim" class="scrim" hidden></div>
+<aside id="drawer" class="drawer" role="dialog" aria-modal="true" aria-label="Your multiverse" hidden>
+  <header><h2>Your multiverse</h2><button id="close-multi" class="ghost" type="button" aria-label="Close">&times;</button></header>
+  <p class="muted drawer-sub">Every what-if you make is saved in this browser. Branches sit under the story they came from.</p>
+  <div id="tree" class="tree"></div>
+  <button id="clear-multi" class="ghost danger" type="button" hidden>Clear everything</button>
+</aside>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="/static/story.js"></script>
+<script src="/static/app.js"></script>
+<script src="/static/hub.js" data-app="whatif" defer></script>
+</body>
+</html>
